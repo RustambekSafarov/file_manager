@@ -31,17 +31,16 @@ class BaseProvider with ChangeNotifier {
 
   Future deleteSpeechsPath(File text) async {
     print(text);
-    if (speechsFiles != null) {
-      speechsFiles.remove(text);
-    }
+
+    speechsFiles.remove(text);
+
     notifyListeners();
     return 'done';
   }
 
   Future deleteLabaratoriesPath(File text) async {
-    if (labaratoriesFiles != null) {
-      labaratoriesFiles.remove(text);
-    }
+    labaratoriesFiles.remove(text);
+
     notifyListeners();
     return 'done';
   }

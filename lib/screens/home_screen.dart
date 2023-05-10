@@ -134,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         icon: const Icon(Icons.delete_forever),
                         onPressed: () {
                           baseProvider
-                              .deleteSpeechsPath(
+                              .deleteLabaratoriesPath(
                             (speechsFiles)[index],
                           )
                               .then((value) {
