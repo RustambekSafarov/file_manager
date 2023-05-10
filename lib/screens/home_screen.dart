@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import '../base_provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,6 +13,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _key = GlobalKey();
+  late TabController _tabController;
   // Future<List<String>> getPaths() async {
   //   SharedPreferences prefs = await SharedPreferences.getInstance();
   //   List<String> paths = prefs.getStringList('file_paths') ?? [];
@@ -23,16 +24,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    // Permission.location.request();
-    Permission.storage.request();
     // getPaths().then((p) => paths = p);
+    _tabController = TabController(length: 3, vsync: this);
 
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final paths = Provider.of<BaseProvider>(context, listen: false).paths;
+    // base provider
+    final baseProvider = Provider.of<BaseProvider>(context, listen: false);
+    final labaratoriesFiles = Provider.of<BaseProvider>(context, listen: false).labaratoriesFiles;
+    final speechsFiles = Provider.of<BaseProvider>(context, listen: false).speechsFiles;
     // print(paths);
     return Scaffold(
         key: _key,
@@ -45,48 +48,58 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               },
               icon: const Icon(Icons.refresh),
             ),
-            // IconButton(
-            //   onPressed: () {
-            //     Provider.of<BaseProvider>(context, listen: false).pickerFile();
-            //   },
-            //   icon: const Icon(Icons.add),
-            // ),
           ],
           bottom: TabBar(
-            controller: TabController(length: 3, vsync: this),
-            tabs: const [
-              Tab(
+            controller: _tabController,
+            tabs: [
+              const Tab(
                 child: Text('Maruzalar'),
               ),
-              Tab(
+              const Tab(
                 child: Text('Labaratoriyalar'),
               ),
-              Tab(
-                child: Text('Emulator'),
+              InkWell(
+                highlightColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                onTap: () async {
+                  const url = 'https://appetize.io/demo?device=iphone8&osVersion=13.7&scale=75';
+                  if (await canLaunchUrl(Uri.parse(url))) {
+                    await launchUrl(Uri.parse(url));
+                  } else {
+                    throw 'Could not launch $url';
+                  }
+                },
+                child: const Tab(
+                  child: Text('Emulator'),
+                ),
               ),
             ],
           ),
         ),
         body: TabBarView(
-          controller: TabController(length: 3, vsync: this),
-          physics: NeverScrollableScrollPhysics(),
+          controller: _tabController,
+          physics: const NeverScrollableScrollPhysics(),
           children: [
             Stack(
               children: [
                 ListView.builder(
-                  itemCount: paths.length,
-                  shrinkWrap: true,
+                  itemCount: (speechsFiles).length,
                   itemBuilder: (context, index) {
-                    ListTile(
+                    return ListTile(
                       leading: const CircleAvatar(
                         child: Icon(Icons.insert_drive_file),
                       ),
-                      title: Text((paths[index]!).split('/')[(paths[index]!).split('/').length - 1]),
+                      title: Text((speechsFiles)[index].path.split('/')[(speechsFiles)[index].path.split('/').length - 1]),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete_forever),
                         onPressed: () {
-                          setState(() {
-                            Provider.of<BaseProvider>(context, listen: false).deletePath(paths[index]!);
+                          baseProvider
+                              .deleteSpeechsPath(
+                            (speechsFiles)[index],
+                          )
+                              .then((value) {
+                            setState(() {});
                           });
                         },
                       ),
@@ -98,45 +111,55 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   right: 15,
                   child: FloatingActionButton(
                     onPressed: () {
-                      Provider.of<BaseProvider>(context, listen: false).pickerFile();
+                      Provider.of<BaseProvider>(context, listen: false).pickerSpeechsFile().then((value) {
+                        setState(() {});
+                      });
                     },
-                    child: Icon(Icons.add),
+                    child: const Icon(Icons.add),
                   ),
                 )
               ],
             ),
             Stack(
               children: [
-                ListView(
-                  shrinkWrap: true,
-                  children: (Provider.of<BaseProvider>(context, listen: false).paths)
-                      .map(
-                        (e) => ListTile(
-                          leading: const CircleAvatar(
-                            child: Icon(Icons.insert_drive_file),
-                          ),
-                          title: Text((e!).split('/')[(e).split('/').length - 1]),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete_forever),
-                            onPressed: () {
-                              Provider.of<BaseProvider>(context, listen: false).deletePath(e);
-                            },
-                          ),
-                        ),
-                      )
-                      .toList(),
+                ListView.builder(
+                  itemCount: (labaratoriesFiles).length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      leading: const CircleAvatar(
+                        child: Icon(Icons.insert_drive_file),
+                      ),
+                      title: Text((labaratoriesFiles)[index].path.split('/')[(labaratoriesFiles)[index].path.split('/').length - 1]),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete_forever),
+                        onPressed: () {
+                          baseProvider
+                              .deleteSpeechsPath(
+                            (speechsFiles)[index],
+                          )
+                              .then((value) {
+                            setState(() {});
+                          });
+                        },
+                      ),
+                    );
+                  },
                 ),
                 Positioned(
                   bottom: 15,
                   right: 15,
                   child: FloatingActionButton(
-                    onPressed: () {},
-                    child: Icon(Icons.add),
+                    onPressed: () {
+                      baseProvider.pickerLabaratoriesFile().then((value) {
+                        setState(() {});
+                      });
+                    },
+                    child: const Icon(Icons.add),
                   ),
                 )
               ],
             ),
-            Center(
+            const Center(
               child: Text('Emulator'),
             )
           ],

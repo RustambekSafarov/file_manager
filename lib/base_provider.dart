@@ -2,30 +2,47 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class BaseProvider with ChangeNotifier {
-  List<File>? files;
-  pickerFile() async {
-    // SharedPreferences prefs = await SharedPreferences.getInstance();
-    Map<Permission, PermissionStatus> status = await [
-      Permission.storage,
-    ].request();
-    if (status[Permission.storage]!.isDenied) {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true);
-      if (result != null) {
-        files = result.paths.map((path) => File(path!)).toList();
-      }
-    } else {
-      Permission.storage.request();
+  List<File> labaratoriesFiles = [];
+
+  Future pickerLabaratoriesFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true);
+    if (result != null) {
+      result.paths
+          .map(
+            (path) => labaratoriesFiles.add(
+              File(path!),
+            ),
+          )
+          .toList();
     }
-    // prefs.setStringList('file_paths', (files ?? []).map((e) => (e.path).split('/')[(e.path).split('/').length - 1]).toList());
+    return 'done';
   }
 
-  List<String?> get paths => (files ?? []).map((file) => kIsWeb ? throw UnsupportedError('Picking paths is unsupported on Web. Please, use bytes property instead.') : file.path).toList();
-  deletePath(String text) {
-    paths.remove(text);
+  List<File> speechsFiles = [];
+  Future pickerSpeechsFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true);
+    if (result != null) {
+      await result.paths.map((path) => speechsFiles.add(File(path!))).toList();
+    }
+    return 'done';
+  }
+
+  Future deleteSpeechsPath(File text) async {
+    print(text);
+    if (speechsFiles != null) {
+      speechsFiles.remove(text);
+    }
     notifyListeners();
+    return 'done';
+  }
+
+  Future deleteLabaratoriesPath(File text) async {
+    if (labaratoriesFiles != null) {
+      labaratoriesFiles.remove(text);
+    }
+    notifyListeners();
+    return 'done';
   }
 }
