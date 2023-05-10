@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: Text('Maruzalar'),
               ),
               const Tab(
-                child: Text('Labaratoriyalar'),
+                child: Text('Labaratoriya'),
               ),
               InkWell(
                 highlightColor: Colors.transparent,
