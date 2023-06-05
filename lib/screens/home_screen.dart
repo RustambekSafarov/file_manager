@@ -1,8 +1,12 @@
+// ignore_for_file: avoid_print
+
+import 'package:file_manager/providers/main_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../base_provider.dart';
+import '../providers/base_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,17 +18,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _key = GlobalKey();
   late TabController _tabController;
-  // Future<List<String>> getPaths() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   List<String> paths = prefs.getStringList('file_paths') ?? [];
-  //   return paths;
-  // }
-
-  // List<String>? paths;
 
   @override
   void initState() {
-    // getPaths().then((p) => paths = p);
     _tabController = TabController(length: 3, vsync: this);
 
     super.initState();
@@ -32,24 +28,31 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final userInfo = Provider.of<AuthProvider>(context, listen: false).userInfo;
     // base provider
     final baseProvider = Provider.of<BaseProvider>(context, listen: false);
-    final labaratoriesFiles = Provider.of<BaseProvider>(context, listen: false).labaratoriesFiles;
-    final speechsFiles = Provider.of<BaseProvider>(context, listen: false).speechsFiles;
-    // print(paths);
+
     return Scaffold(
         key: _key,
         appBar: AppBar(
-          title: const Text('File Picker'),
+          backgroundColor: Colors.indigo[400],
+          title: const Text(
+            'File Picker',
+            style: TextStyle(color: Colors.white),
+          ),
           actions: [
             IconButton(
               onPressed: () {
                 setState(() {});
               },
               icon: const Icon(Icons.refresh),
+              color: Colors.white,
             ),
           ],
           bottom: TabBar(
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white,
+            indicatorColor: Colors.indigo[100],
             controller: _tabController,
             tabs: [
               const Tab(
@@ -63,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 hoverColor: Colors.transparent,
                 splashColor: Colors.transparent,
                 onTap: () async {
-                  const url = 'https://appetize.io/demo?device=iphone8&osVersion=13.7&scale=75';
+                  const url = 'https://pythontutor.com/visualize.html#mode=edit';
                   if (await canLaunchUrl(Uri.parse(url))) {
                     await launchUrl(Uri.parse(url));
                   } else {
@@ -83,27 +86,41 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           children: [
             Stack(
               children: [
-                ListView.builder(
-                  itemCount: (speechsFiles).length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      leading: const CircleAvatar(
-                        child: Icon(Icons.insert_drive_file),
-                      ),
-                      title: Text((speechsFiles)[index].path.split('/')[(speechsFiles)[index].path.split('/').length - 1]),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete_forever),
-                        onPressed: () {
-                          baseProvider
-                              .deleteSpeechsPath(
-                            (speechsFiles)[index],
+                FutureBuilder(
+                  future: Provider.of<BaseProvider>(context, listen: false).getSpeechs(),
+                  builder: (context, snapshot) {
+                    // final speechsFiles = Provider.of<BaseProvider>(context, listen: false).speechsFiles;
+                    return snapshot.connectionState == ConnectionState.waiting
+                        ? const Center(
+                            child: CircularProgressIndicator(),
                           )
-                              .then((value) {
-                            setState(() {});
-                          });
-                        },
-                      ),
-                    );
+                        : snapshot.hasData
+                            ? ListView.builder(
+                                itemCount: snapshot.data!.length,
+                                itemBuilder: (context, index) {
+                                  return snapshot == []
+                                      ? const Center(
+                                          child: Text('No files yet!'),
+                                        )
+                                      : ListTile(
+                                          onTap: () async {
+                                            await OpenFilex.open(snapshot.data![index].path).then((value) => print(value.message));
+                                          },
+                                          leading: const CircleAvatar(
+                                            child: Icon(Icons.insert_drive_file),
+                                          ),
+                                          title: Text(snapshot.data![index].path.split('/').last),
+                                          subtitle: Text('From: ${userInfo!.displayName}'),
+                                          trailing: IconButton(
+                                            icon: const Icon(Icons.delete_forever),
+                                            onPressed: () {},
+                                          ),
+                                        );
+                                },
+                              )
+                            : Center(
+                                child: Text(snapshot.error.toString()),
+                              );
                   },
                 ),
                 Positioned(
@@ -111,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   right: 15,
                   child: FloatingActionButton(
                     onPressed: () {
-                      Provider.of<BaseProvider>(context, listen: false).pickerSpeechsFile().then((value) {
+                      Provider.of<BaseProvider>(context, listen: false).pickerSpeechsFile(context).then((value) {
                         setState(() {});
                       });
                     },
@@ -122,27 +139,41 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             Stack(
               children: [
-                ListView.builder(
-                  itemCount: (labaratoriesFiles).length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      leading: const CircleAvatar(
-                        child: Icon(Icons.insert_drive_file),
-                      ),
-                      title: Text((labaratoriesFiles)[index].path.split('/')[(labaratoriesFiles)[index].path.split('/').length - 1]),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete_forever),
-                        onPressed: () {
-                          baseProvider
-                              .deleteLabaratoriesPath(
-                            (speechsFiles)[index],
+                FutureBuilder(
+                  future: Provider.of<BaseProvider>(context, listen: false).getLabaratories(),
+                  builder: (context, snapshot) {
+                    // final labaratoriesFiles = Provider.of<BaseProvider>(context, listen: false).labaratoriesFiles;
+                    return snapshot.connectionState == ConnectionState.waiting
+                        ? const Center(
+                            child: CircularProgressIndicator(),
                           )
-                              .then((value) {
-                            setState(() {});
-                          });
-                        },
-                      ),
-                    );
+                        : snapshot.hasData
+                            ? ListView.builder(
+                                itemCount: snapshot.data!.length,
+                                itemBuilder: (context, index) {
+                                  return snapshot.data == []
+                                      ? const Center(
+                                          child: Text('No files yet!'),
+                                        )
+                                      : ListTile(
+                                          onTap: () {
+                                            OpenFilex.open(snapshot.data![index].path);
+                                          },
+                                          leading: const CircleAvatar(
+                                            child: Icon(Icons.insert_drive_file),
+                                          ),
+                                          title: Text(snapshot.data![index].path.split('/').last),
+                                          subtitle: Text('From: ${userInfo!.displayName}'),
+                                          trailing: IconButton(
+                                            icon: const Icon(Icons.delete_forever),
+                                            onPressed: () {},
+                                          ),
+                                        );
+                                },
+                              )
+                            : Center(
+                                child: Text(snapshot.error.toString()),
+                              );
                   },
                 ),
                 Positioned(
@@ -150,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   right: 15,
                   child: FloatingActionButton(
                     onPressed: () {
-                      baseProvider.pickerLabaratoriesFile().then((value) {
+                      baseProvider.pickerLabaratoriesFile(context).then((value) {
                         setState(() {});
                       });
                     },
