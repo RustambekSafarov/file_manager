@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../base_provider.dart';
@@ -25,6 +26,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     // getPaths().then((p) => paths = p);
+    
+
     _tabController = TabController(length: 3, vsync: this);
 
     super.initState();
@@ -40,16 +43,30 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Scaffold(
         key: _key,
         appBar: AppBar(
-          title: const Text('File Picker'),
+          title: const Text(
+            'File Picker',
+            style: TextStyle(color: Colors.white),
+          ),
           actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/');
+              },
+              icon: Icon(Icons.login),
+              color: Colors.white,
+            ),
             IconButton(
               onPressed: () {
                 setState(() {});
               },
               icon: const Icon(Icons.refresh),
+              color: Colors.white,
             ),
           ],
           bottom: TabBar(
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white,
+            indicatorColor: Colors.indigo[100],
             controller: _tabController,
             tabs: [
               const Tab(
@@ -87,6 +104,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   itemCount: (speechsFiles).length,
                   itemBuilder: (context, index) {
                     return ListTile(
+                      onTap: () async {
+                        await OpenFilex.open(speechsFiles[index].path).then((value) => print(value.message));
+                      },
                       leading: const CircleAvatar(
                         child: Icon(Icons.insert_drive_file),
                       ),
@@ -126,6 +146,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   itemCount: (labaratoriesFiles).length,
                   itemBuilder: (context, index) {
                     return ListTile(
+                      onTap: () async {
+                        await OpenFilex.open((labaratoriesFiles)[index].path);
+                      },
                       leading: const CircleAvatar(
                         child: Icon(Icons.insert_drive_file),
                       ),

@@ -40,6 +40,8 @@ dependencies:
   provider: ^6.0.5
   shared_preferences: ^2.1.0
   url_launcher: ^6.1.11
+  open_filex: ^4.3.2
+  path_provider: ^2.0.15
 
 dev_dependencies:
   flutter_test:
@@ -64,9 +66,20 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/ 
+    - assets/files/N1-LABORATORIYA ISHI.docx
+    - assets/files/N2-LABORATORIYA ISHI.docx
+    - assets/files/N3-LABORATORIYA ISHI..docx
+    - assets/files/N4-LABORATORIYA ISHI.docx
+    - assets/files/N5-LABORATORIYA ISHI.docx
+    - assets/files/N1-ma’ruza.docx
+    - assets/files/N2-ma’ruza.docx
+    - assets/files/N3-ma’ruza.docx
+    - assets/files/N4-ma’ruza.docx
+    - assets/files/N5 ma'ruza.docx
+    - assets/files/N6 ma'ruza.docx
+    - assets/files/N7-ma’ruza.docx
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

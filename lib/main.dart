@@ -1,4 +1,5 @@
 import 'package:file_manager/base_provider.dart';
+import 'package:file_manager/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -19,9 +20,20 @@ class MainRoot extends StatelessWidget {
           create: (context) => BaseProvider(),
         )
       ],
-      child: const MaterialApp(
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          useMaterial3: true,
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.indigo,
+          ),
+        ),
         title: 'File Picker Demo',
-        home: HomeScreen(),
+        // initialRoute: 'home',
+        routes: {
+          '/': (context) => const LoginScreen(),
+          'home': (context) => const HomeScreen(),
+        },
       ),
     );
   }
